@@ -1,0 +1,74 @@
+Loaded: src/data/telco_churn.csv
+Shape: (7043, 21)
+
+Dtypes:
+  customerID: object
+  gender: object
+  SeniorCitizen: int64
+  Partner: object
+  Dependents: object
+  tenure: int64
+  PhoneService: object
+  MultipleLines: object
+  InternetService: object
+  OnlineSecurity: object
+  OnlineBackup: object
+  DeviceProtection: object
+  TechSupport: object
+  StreamingTV: object
+  StreamingMovies: object
+  Contract: object
+  PaperlessBilling: object
+  PaymentMethod: object
+  MonthlyCharges: float64
+  TotalCharges: object
+  Churn: object
+
+Missing values (count, %):
+  customerID: 0 (0.0%)
+  gender: 0 (0.0%)
+  SeniorCitizen: 0 (0.0%)
+  Partner: 0 (0.0%)
+  Dependents: 0 (0.0%)
+  tenure: 0 (0.0%)
+  PhoneService: 0 (0.0%)
+  MultipleLines: 0 (0.0%)
+  InternetService: 0 (0.0%)
+  OnlineSecurity: 0 (0.0%)
+  OnlineBackup: 0 (0.0%)
+  DeviceProtection: 0 (0.0%)
+  TechSupport: 0 (0.0%)
+  StreamingTV: 0 (0.0%)
+  StreamingMovies: 0 (0.0%)
+  Contract: 0 (0.0%)
+  PaperlessBilling: 0 (0.0%)
+  PaymentMethod: 0 (0.0%)
+  MonthlyCharges: 0 (0.0%)
+  TotalCharges: 0 (0.0%)
+  Churn: 0 (0.0%)
+
+Duplicates: 0
+
+Categorical cardinality:
+  customerID: 7043
+  gender: 2
+  Partner: 2
+  Dependents: 2
+  PhoneService: 2
+  MultipleLines: 3
+  InternetService: 3
+  OnlineSecurity: 3
+  OnlineBackup: 3
+  DeviceProtection: 3
+  TechSupport: 3
+  StreamingTV: 3
+  StreamingMovies: 3
+  Contract: 3
+  PaperlessBilling: 2
+  PaymentMethod: 4
+  TotalCharges: 6531
+  Churn: 2
+
+Target distribution:
+  No: 5174 (73.46%)
+  Yes: 1869 (26.54%)
