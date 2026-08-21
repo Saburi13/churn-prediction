@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import precision_recall_fscore_support, roc_auc_score, average_precision_score, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score, average_precision_score, confusion_matrix
 from sklearn.pipeline import Pipeline
 # ensure local src is importable
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -58,38 +58,38 @@ def train_and_evaluate(data_path: str, target_col: str = 'Churn'):
     # Train/test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
-    final_pipe = Pipeline([('pre', preprocessor), ('clf', best_clf)])
-    final_pipe.fit(X_train, y_train)
+    final_pipelines = {}
+    test_metrics = {}
+    for name, clf in models.items():
+        final_pipe = Pipeline([('pre', build_preprocessor(X_train)[0]), ('clf', clf)])
+        final_pipe.fit(X_train, y_train)
+        y_proba = final_pipe.predict_proba(X_test)[:, 1]
+        y_pred = (y_proba >= 0.5).astype(int)
 
-    # Evaluate on test
-    y_proba = final_pipe.predict_proba(X_test)[:, 1]
-    y_pred = (y_proba >= 0.5).astype(int)
+        precision, recall, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='binary')
+        metrics = {
+            'accuracy': float(accuracy_score(y_test, y_pred)),
+            'precision': float(precision),
+            'recall': float(recall),
+            'f1': float(f1),
+            'roc_auc': float(roc_auc_score(y_test, y_proba)),
+            'pr_auc': float(average_precision_score(y_test, y_proba)),
+            'confusion_matrix': confusion_matrix(y_test, y_pred).tolist()
+        }
+        final_pipelines[name] = final_pipe
+        test_metrics[name] = metrics
+        print(f'{name} test metrics:', metrics)
 
-    precision, recall, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='binary')
-    roc_auc = roc_auc_score(y_test, y_proba)
-    pr_auc = average_precision_score(y_test, y_proba)
-    cm = confusion_matrix(y_test, y_pred).tolist()
-
-    metrics = {
-        'precision': float(precision),
-        'recall': float(recall),
-        'f1': float(f1),
-        'roc_auc': float(roc_auc),
-        'pr_auc': float(pr_auc),
-        'confusion_matrix': cm
-    }
-
-    print('Test metrics:', metrics)
-
-    # Save pipeline and metadata
+    # Save both pipelines and preserve pipeline.joblib as the Logistic Regression default.
     os.makedirs('models', exist_ok=True)
-    pipeline_path = os.path.join('models', 'pipeline.joblib')
-    dump(final_pipe, pipeline_path)
-    meta = {'model': best_name, 'metrics': metrics}
+    for name, pipeline in final_pipelines.items():
+        dump(pipeline, os.path.join('models', f'model_{name}.joblib'))
+    dump(final_pipelines['logreg'], os.path.join('models', 'pipeline.joblib'))
+    meta = {'default_model': 'logreg', 'models': test_metrics, 'model': best_name, 'metrics': test_metrics[best_name]}
     with open(os.path.join('models', 'model_info.json'), 'w', encoding='utf8') as f:
         json.dump(meta, f, indent=2)
 
-    print(f"Saved pipeline to {pipeline_path} and metadata to models/model_info.json")
+    print('Saved model_logreg.joblib, model_rf.joblib, pipeline.joblib, and model_info.json')
 
 
 if __name__ == '__main__':
